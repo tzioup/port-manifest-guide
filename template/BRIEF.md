@@ -11,18 +11,9 @@ You are done when:
 
 ## Session planning
 
-This work will not fit in a single context window. A mature V4 instance has thousands of files across dozens of directories — the filesystem audit alone can exhaust a session. Plan for multiple sessions and/or parallel agents.
+This work spans multiple context windows. First session priority: build a **Spine** — a durable state file on disk for cross-session continuity. Each subsequent session reads the Spine first and updates it before closing. The Spine tracks progress and decisions so nothing is re-derived or contradicted across sessions.
 
-**First session priority: build the Spine.** Before doing any manifest work, produce a continuation document that ensures lossless handover between sessions. The Spine should contain:
-
-- **Filesystem audit results** — verified counts for every major directory (hooks, skills, agents, memory subdirs, portal pages, project dirs, cron jobs, systemd services). These are expensive to gather and must not be re-derived.
-- **Intent list** — the full accounting of every artifact's planned fate (entry, anti-port, or folded). This is the single most important artifact for continuity.
-- **Decisions made** — grouping choices, category assignments, split/merge rationale. Without these, the next session will re-decide differently and produce inconsistent entries.
-- **What's done and what's not** — which entries are written and validated, which are pending, which directories haven't been walked yet.
-
-Write the Spine to a durable file (not just session context). Each subsequent session reads the Spine first, does its work, and updates it before closing. The manifest is the deliverable; the Spine is how you get there without losing fidelity across context boundaries.
-
-**Parallelism options:** The filesystem audit (Pass 1, Step 1) can be split across parallel agents — one per major directory tree. The JSONL writing can be batched by category. The verification pass (Pass 2) should run sequentially since it cross-checks the full manifest.
+**Parallelism:** The filesystem audit can split across parallel agents by directory tree. JSONL writing can batch by category. The verification pass (Pass 2) runs sequentially since it cross-checks the full manifest.
 
 ## Companion files in this directory
 
