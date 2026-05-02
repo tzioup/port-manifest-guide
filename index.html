@@ -262,7 +262,7 @@ hr {
 
 <div class="card" style="border-left: 3px solid var(--purple); background: rgba(196, 113, 237, 0.06);">
 <span class="label" style="background: rgba(196, 113, 237, 0.2); color: var(--purple);">TL;DR</span>
-<p>A Port Manifest catalogs every artifact in your V4 PAI installation so V5 can find and port them. Your PAI builds it in two passes: audit the filesystem, then verify the draft against reality. A <code>git diff</code> against your stock install baseline covers ~12% of customizations; the manifest process handles the other ~88% (memory, projects, portal, infrastructure). The manifest is an input to V5 &mdash; V5 decides where things go.</p>
+<p>A Port Manifest catalogs every artifact in your V4 PAI installation so V5 can find and port them. Your PAI builds it in two passes: audit the filesystem, then verify the draft against reality. A <code>git diff</code> against your stock baseline only catches modifications to stock files &mdash; user-generated content (memory, projects, portal, infrastructure) has no stock counterpart and is invisible to any diff. The manifest process covers both. The manifest is an input to V5 &mdash; V5 decides where things go.</p>
 <p style="margin-bottom:0;"><strong>To run this:</strong> Point your PAI at the <a href="template/BRIEF.md" style="color: var(--purple); font-weight: 600;">token-optimized starter kit</a> (BRIEF.md + validator + seed JSONL), not this page. This page is for <em>you</em> to understand the principles and review your PAI's output.</p>
 </div>
 
@@ -417,20 +417,20 @@ hr {
 
 <h3>The practical answer: we measured it</h3>
 
-<p>We ran <code>git diff</code> against our stock V4 baseline (the initial post-install commit) on a mature instance. The results:</p>
+<p>We ran <code>git diff</code> against our stock V4 baseline (the initial post-install commit) on our instance. Your numbers will vary depending on how long you've run V4 and how much content you've generated, but the principle held clearly:</p>
 
 <table>
-<tr><th>What the diff sees</th><th>% of instance</th></tr>
+<tr><th>What the diff sees</th><th>Our instance</th></tr>
 <tr><td>Modified stock files (customizations to hooks, skills, agents, PAI/, settings)</td><td>~1%</td></tr>
 <tr><td>Added files inside tracked dirs (new hooks, skills, agents, PAI tools)</td><td>~11%</td></tr>
 <tr><td style="color: var(--pink);">Files outside tracked dirs (MEMORY, projects, portal, scripts, plugins, infrastructure, research, sessions, commands...)</td><td style="color: var(--pink);"><strong>~88%</strong></td></tr>
 </table>
 
-<p><strong>The diff covers roughly 12% of the instance.</strong> The other 88% is user-generated content with no stock counterpart &mdash; invisible to any diff. The modified stock files are valuable to surface (especially customized Algorithm blocks, hook overrides, and agent tweaks), but they are a small fraction of the porting surface.</p>
+<p>On our instance, the diff covered roughly 12%. The vast majority of files were user-generated content with no stock counterpart &mdash; invisible to any diff. <strong>The principle:</strong> a diff catches customizations to stock files (Algorithm blocks, hook overrides, agent tweaks), but user-generated content will always be the bulk of what needs porting, and it has nothing to diff against.</p>
 
 <div class="card info">
 <span class="label label-info">Best of both</span>
-<p style="margin-bottom:0;">If you have a stock baseline (your initial install commit, or a fork of the V4 repo), use the diff as <strong>input to Pass 1</strong>. It gives you the 105-type customizations fast. Then do the filesystem walk for the 88% the diff can't see. The diff accelerates discovery; the manifest provides the structure V5 needs to consume everything.</p>
+<p style="margin-bottom:0;">If you have a stock baseline (your initial install commit, or a fork of the V4 repo), use the diff as <strong>input to Pass 1</strong>. It surfaces customizations to stock files fast. Then do the filesystem walk for everything the diff can't see. The diff accelerates discovery; the manifest provides the structure V5 needs to consume everything.</p>
 </div>
 
 <div class="card danger">

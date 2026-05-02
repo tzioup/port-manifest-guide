@@ -2,7 +2,7 @@
 
 **A methodology for cataloging V4 PAI artifacts so V5 can find and port them.**
 
-A Port Manifest catalogs every artifact in your V4 PAI installation so V5 can find and port them. Your PAI builds it in two passes: audit the filesystem, then verify the draft against reality. A `git diff` against your stock install baseline covers ~12% of customizations; the manifest process handles the other ~88% (memory, projects, portal, infrastructure). The manifest is an input to V5 — V5 decides where things go.
+A Port Manifest catalogs every artifact in your V4 PAI installation so V5 can find and port them. Your PAI builds it in two passes: audit the filesystem, then verify the draft against reality. A `git diff` against your stock baseline only catches modifications to stock files — user-generated content (memory, projects, portal, infrastructure) has no stock counterpart and is invisible to any diff. The manifest process covers both. The manifest is an input to V5 — V5 decides where things go.
 
 ## Quick Start
 

@@ -91,4 +91,4 @@ V5 queries the JSONL by intent, reads port_notes to understand V4's role, then s
 
 Your V4 instance is a git repo. Check `git log --oneline --reverse | head -1` for the initial post-install commit — that's your stock baseline. If it exists, `git diff --stat <commit> HEAD` shows what you customized vs stock.
 
-Measured on a real instance: **the diff covers ~12% of files**. The other ~88% is user-generated content outside tracked dirs — MEMORY, projects, portal, scripts, plugins, infrastructure — invisible to any diff. Use the diff to seed Pass 1 discovery for customizations to stock files (Algorithm blocks, hook overrides, agent tweaks); the manifest process handles the other 88%.
+The diff only catches modifications to stock files. User-generated content (MEMORY, projects, portal, scripts, plugins, infrastructure) has no stock counterpart and is invisible to any diff — and on a mature instance, user-generated content is the majority of what needs porting. Use the diff to seed Pass 1 discovery for customizations to stock files (Algorithm blocks, hook overrides, agent tweaks); the manifest process handles everything else.
