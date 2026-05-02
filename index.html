@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Port Manifest Guide — V4 to V5 Migration</title>
+<style>
+:root {
+  --bg-primary: #0d1220;
+  --bg-secondary: #141c2c;
+  --bg-tertiary: #1c2638;
+  --text-primary: #f0f2f5;
+  --text-secondary: #c0c8d4;
+  --text-muted: #8a919d;
+  --cyan: #12c2e9;
+  --purple: #c471ed;
+  --pink: #ff6b9d;
+  --magenta: #e879f9;
+  --blue: #6BB6FF;
+  --orange: #F39C12;
+  --teal: #2dd4bf;
+  --border: rgba(255, 255, 255, 0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.7;
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h1 {
+  color: var(--cyan);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  color: var(--cyan);
+  font-size: 1.4rem;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+h3 {
+  color: var(--purple);
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+p { margin-bottom: 1rem; color: var(--text-secondary); }
+
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.warning {
+  border-left: 3px solid var(--orange);
+  background: rgba(243, 156, 18, 0.06);
+}
+
+.info {
+  border-left: 3px solid var(--cyan);
+  background: rgba(18, 194, 233, 0.06);
+}
+
+.success {
+  border-left: 3px solid var(--teal);
+  background: rgba(45, 212, 191, 0.06);
+}
+
+.danger {
+  border-left: 3px solid var(--pink);
+  background: rgba(255, 107, 157, 0.06);
+}
+
+.label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  margin-bottom: 0.5rem;
+}
+
+.label-warn { background: rgba(243, 156, 18, 0.2); color: var(--orange); }
+.label-info { background: rgba(18, 194, 233, 0.2); color: var(--cyan); }
+.label-gotcha { background: rgba(255, 107, 157, 0.2); color: var(--pink); }
+
+code {
+  background: var(--bg-tertiary);
+  color: var(--pink);
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+pre {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: var(--text-secondary);
+}
+
+ul, ol {
+  margin: 0.5rem 0 1rem 1.5rem;
+  color: var(--text-secondary);
+}
+
+li { margin-bottom: 0.4rem; }
+li::marker { color: var(--pink); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+th {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--cyan);
+  color: var(--bg-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.toc {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.toc ul { list-style: none; margin-left: 0; }
+.toc li { margin-bottom: 0.3rem; }
+.toc li::marker { content: ''; }
+.toc a { color: var(--text-secondary); }
+.toc a:hover { color: var(--cyan); }
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.flow-step {
+  background: var(--bg-tertiary);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.flow-arrow { color: var(--text-muted); }
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+@media (max-width: 700px) {
+  .compare-grid { grid-template-columns: 1fr; }
+}
+
+.compare-col {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.compare-col h3 { margin-top: 0; }
+
+.compare-col ul { margin-bottom: 0; }
+</style>
+</head>
+<body>
+
+<h1>Building a Port Manifest</h1>
+<p class="subtitle">A methodology for cataloging V4 PAI artifacts so V5 can find and port them. Tested on a real migration. Honest about where it breaks. Your PAI does the work &mdash; this gives you visibility over the principles so you can spot gaps.</p>
+
+<div class="toc">
+<strong style="color: var(--text-primary);">Contents</strong>
+<ul>
+<li><a href="#what">What is a Port Manifest?</a></li>
+<li><a href="#where">Where This Fits in Migration</a></li>
+<li><a href="#approach">Diff vs. Manifest &mdash; Choosing Your Approach</a></li>
+<li><a href="#process">The 2-Pass Process</a></li>
+<li><a href="#schema">The Schema</a></li>
+<li><a href="#validator">The Validator</a></li>
+<li><a href="#gotchas">Gotchas</a></li>
+<li><a href="#limitations">Honest Limitations</a></li>
+<li><a href="#what-v5-does">What V5 Does With This</a></li>
+<li><a href="#starter-kit">Starter Kit</a></li>
+</ul>
+</div>
+
+<hr>
+
+<h2 id="what">What is a Port Manifest?</h2>
+
+<p>A Port Manifest is an LLM-optimized catalog of every artifact in a V4 PAI installation, organized by <strong>intent</strong> rather than file path. It tells V5: "here's what V4 had, why it existed, what shape it's in, and what depends on what."</p>
+
+<p>It is <strong>not</strong> an architecture diagram, a dependency graph, or a migration script. It is a navigation aid. V5 reads it and knows where to look &mdash; in two tool calls instead of two hundred.</p>
+
+<div class="card info">
+<span class="label label-info">Why intent-based</span>
+<p style="margin-bottom:0;">File paths are meaningless across architecture versions. V4's <code>hooks/lib/btt.ts</code> tells V5 nothing. But "BTT desktop automation bridge &mdash; connects Mac BetterTouchTool to VM via autossh tunnel" tells V5 exactly what it needs to decide: port, adapt, or skip.</p>
+</div>
+
+<p>The manifest has two faces:</p>
+<ul>
+<li><strong>JSONL</strong> &mdash; machine-readable, one JSON object per line, schema-validated. This is what V5 queries programmatically.</li>
+<li><strong>Markdown routing table</strong> &mdash; human-readable, generated from the JSONL. Category tables, gated items, anti-port list, cross-environment artifacts. This is what <em>you</em> review to spot gaps your PAI missed.</li>
+</ul>
+
+<div class="card info">
+<span class="label label-info">Who does the work</span>
+<p style="margin-bottom:0;">Your PAI builds the manifest. You review it. This guide exists so you understand the principles well enough to catch mistakes &mdash; phantom paths, missing directories, V5 prescriptions leaking in, entries grouped too coarsely. The <a href="#starter-kit">Starter Kit</a> includes an LLM-optimized brief you can paste into a fresh PAI session, plus the validator and template files.</p>
+</div>
+
+<h2 id="where">Where This Fits in Migration</h2>
+
+<div class="flow">
+<span class="flow-step">V4 Instance</span>
+<span class="flow-arrow">&rarr;</span>
+<span class="flow-step" style="border: 1px solid var(--cyan); color: var(--cyan);">Port Manifest (you are here)</span>
+<span class="flow-arrow">&rarr;</span>
+<span class="flow-step">V5 Pulls from Manifest</span>
+<span class="flow-arrow">&rarr;</span>
+<span class="flow-step">V5 Self-Places Artifacts</span>
+</div>
+
+<p>The manifest is <strong>one step of the process</strong>, not the whole migration. It produces a catalog that V5 consumes. V5 is a different architecture &mdash; it decides where things go. The manifest describes V4; it does not prescribe V5.</p>
+
+<div class="card warning">
+<span class="label label-warn">Critical constraint</span>
+<p style="margin-bottom:0;">The manifest must have <strong>no V5 prescriptions</strong>. No "this goes in V5's identity folder." No "V5 consolidates these into..." V5 is a different system with different structure. If the manifest tells V5 where to put things, V5 inherits V4's architecture decisions instead of making its own. Every entry has a <code>v5_destination: null</code> field &mdash; the null is load-bearing.</p>
+</div>
+
+<div class="card warning">
+<span class="label label-warn">Relative paths</span>
+<p style="margin-bottom:0;">All <code>v4_paths</code> inside the PAI repo must be <strong>relative to the repo root</strong> &mdash; <code>hooks/lib/btt.ts</code>, not <code>~/.claude/hooks/lib/btt.ts</code>. Why: by the time V5 ports from this manifest, V5 will own <code>~/.claude/</code> and the V4 backup will live somewhere else (e.g. <code>~/.claude.v4-backup/</code>). Relative paths resolve against whatever root V5 points at. Paths to artifacts <em>outside</em> the repo (<code>~/work/</code>, <code>~/portal/</code>, <code>~/Projects/</code>, <code>~/.config/</code>) use <code>~</code> prefix since those directories don't move during migration.</p>
+</div>
+
+<h2 id="approach">Diff vs. Manifest &mdash; Choosing Your Approach</h2>
+
+<p>If your V4 was installed from a shared repo, you might think: "Why not just diff my instance against the stock V4 repo and catalog what's different?" It's a reasonable instinct. Here's how the two approaches compare:</p>
+
+<div class="compare-grid">
+<div class="compare-col">
+<h3 style="color: var(--teal);">Repo Diff</h3>
+<p style="font-size: 0.9rem;"><code>diff -rq ~/.claude/ /path/to/stock-v4/</code></p>
+<ul>
+<li><strong>Fast.</strong> Mechanical &mdash; minutes, not hours.</li>
+<li><strong>Exhaustive for modifications.</strong> Every changed line in every tracked file surfaces automatically.</li>
+<li><strong>No human judgment in discovery phase.</strong> The diff doesn't miss files it can see.</li>
+<li><strong>Great for customizations to stock files</strong> &mdash; custom Algorithm blocks, hook overrides, settings changes.</li>
+</ul>
+</div>
+<div class="compare-col">
+<h3 style="color: var(--cyan);">Port Manifest</h3>
+<p style="font-size: 0.9rem;">Structured audit &rarr; intent list &rarr; JSONL</p>
+<ul>
+<li><strong>Captures intent.</strong> Groups files by purpose, not by path.</li>
+<li><strong>Covers user-generated content.</strong> Memory, projects, portal, research &mdash; things with no stock counterpart.</li>
+<li><strong>Documents dependencies, debt, and decisions.</strong> V5 knows the <em>why</em>, not just the <em>what</em>.</li>
+<li><strong>Handles off-VM artifacts.</strong> Cloud databases, host-machine configs, SaaS state.</li>
+</ul>
+</div>
+</div>
+
+<h3>Where a diff falls short</h3>
+
+<p>The diff catches <em>modifications to stock files</em> but is blind to the rest:</p>
+
+<table>
+<tr><th>Artifact Type</th><th>Repo Diff</th><th>Port Manifest</th></tr>
+<tr>
+<td>Custom Algorithm blocks in stock files</td>
+<td style="color: var(--teal);">Sees every changed line</td>
+<td style="color: var(--text-muted);">Knows it exists, not the line-level delta</td>
+</tr>
+<tr>
+<td>Hook overrides / settings changes</td>
+<td style="color: var(--teal);">Sees the diff</td>
+<td style="color: var(--text-muted);">Describes the role, not the diff</td>
+</tr>
+<tr>
+<td>User memory (hundreds of files)</td>
+<td style="color: var(--pink);">No stock counterpart &mdash; invisible</td>
+<td style="color: var(--teal);">Cataloged with counts and role</td>
+</tr>
+<tr>
+<td>Projects in ~/work/, ~/Projects/</td>
+<td style="color: var(--pink);">Outside repo &mdash; invisible</td>
+<td style="color: var(--teal);">Cataloged by intent</td>
+</tr>
+<tr>
+<td>Portal pages, research, creative output</td>
+<td style="color: var(--pink);">Outside repo &mdash; invisible</td>
+<td style="color: var(--teal);">Cataloged with active/dormant status</td>
+</tr>
+<tr>
+<td>Cron jobs, systemd services, env vars</td>
+<td style="color: var(--pink);">Not in repo &mdash; invisible</td>
+<td style="color: var(--teal);">Enumerated</td>
+</tr>
+<tr>
+<td>Cloud state (CF Workers, D1/KV)</td>
+<td style="color: var(--pink);">Not on disk &mdash; invisible</td>
+<td style="color: var(--teal);">Listed in cross-environment section</td>
+</tr>
+<tr>
+<td>Host-machine state (BTT, LaunchAgents)</td>
+<td style="color: var(--pink);">Not on VM &mdash; invisible</td>
+<td style="color: var(--teal);">Listed in cross-environment section</td>
+</tr>
+<tr>
+<td>Dependencies between artifacts</td>
+<td style="color: var(--pink);">No model for this</td>
+<td style="color: var(--text-muted);">Partial (~30% of real deps)</td>
+</tr>
+<tr>
+<td>Debt assessment / port readiness</td>
+<td style="color: var(--pink);">No model for this</td>
+<td style="color: var(--teal);">Per-entry assessment</td>
+</tr>
+</table>
+
+<h3>The practical answer: we measured it</h3>
+
+<p>We ran <code>git diff</code> against our stock V4 baseline (the initial post-install commit) on a mature instance. The results:</p>
+
+<table>
+<tr><th>What the diff sees</th><th>% of instance</th></tr>
+<tr><td>Modified stock files (customizations to hooks, skills, agents, PAI/, settings)</td><td>~1%</td></tr>
+<tr><td>Added files inside tracked dirs (new hooks, skills, agents, PAI tools)</td><td>~11%</td></tr>
+<tr><td style="color: var(--pink);">Files outside tracked dirs (MEMORY, projects, portal, scripts, plugins, infrastructure, research, sessions, commands...)</td><td style="color: var(--pink);"><strong>~88%</strong></td></tr>
+</table>
+
+<p><strong>The diff covers roughly 12% of the instance.</strong> The other 88% is user-generated content with no stock counterpart &mdash; invisible to any diff. The modified stock files are valuable to surface (especially customized Algorithm blocks, hook overrides, and agent tweaks), but they are a small fraction of the porting surface.</p>
+
+<div class="card info">
+<span class="label label-info">Best of both</span>
+<p style="margin-bottom:0;">If you have a stock baseline (your initial install commit, or a fork of the V4 repo), use the diff as <strong>input to Pass 1</strong>. It gives you the 105-type customizations fast. Then do the filesystem walk for the 88% the diff can't see. The diff accelerates discovery; the manifest provides the structure V5 needs to consume everything.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">Finding your baseline</span>
+<p>Your V4 instance is a git repo. The stock baseline is likely your earliest commit &mdash; run <code>git log --oneline --reverse | head -1</code> to find it. If your repo history was squashed or you don't have an initial post-install snapshot, there's nothing to diff against and the manifest process is the only path.</p>
+<p style="margin-bottom:0;">The upstream PAI repo (<code>danielmiessler/PAI</code>) was squashed to a single commit for V5 &mdash; you can't clone it and diff against a V4 tree. Your local git history is the only source for a stock baseline.</p>
+</div>
+
+<h2 id="process">The 2-Pass Process</h2>
+
+<p>The manifest is built in two passes. The first pass discovers what exists and builds a draft. The second pass verifies the draft against the actual filesystem and fixes what the first pass got wrong.</p>
+
+<p>Why two passes? Because the first pass will be incomplete. It always is. You'll miss directories, trust stale counts, overlook root-level orphans, and group things too coarsely. The second pass exists to catch this &mdash; the discipline is doing it rather than shipping the draft.</p>
+
+<h3>Pass 1: Audit and Draft</h3>
+
+<div class="step-header"><span class="step-num">1</span> <strong>Walk the filesystem</strong></div>
+<p>Before writing a single manifest entry, know what's on disk. <code>find</code> and <code>du</code> are more honest than any index or session log.</p>
+<ul>
+<li>Count everything: hooks, skills, agents, memory subdirs, portal pages, project dirs, cron jobs, systemd services.</li>
+<li>Check outside the main directory &mdash; project repos, portal content, exchange directories.</li>
+<li>Walk the repository root explicitly. One-off scripts, research repos, and parked code sitting at the root get missed by every other audit pattern.</li>
+<li>Identify off-machine artifacts: cloud state, host-machine configs, external services.</li>
+<li>If you have a stock V4 repo to diff against, run the diff here and use it to seed your customization list.</li>
+</ul>
+
+<div class="step-header"><span class="step-num">2</span> <strong>Build the intent list</strong></div>
+<p>Before writing JSON, write a plain table: one line per intent, with category, status, and source.</p>
+
+<pre><code>| # | intent          | category       | status  | source          |
+|---|-----------------|----------------|---------|-----------------|
+| 1 | claude-md       | core-identity  | pending | filesystem audit |
+| 2 | hooks-shared    | hooks          | pending | filesystem audit |
+| 3 | old-experiment  | projects       | skipped | filesystem audit |</code></pre>
+
+<p>Every V4 artifact must have exactly one fate:</p>
+<ul>
+<li><strong>Entry</strong> &mdash; gets a manifest line with full schema</li>
+<li><strong>Anti-port</strong> &mdash; explicitly documented as "not porting, here's why"</li>
+<li><strong>Folded</strong> &mdash; covered by another entry</li>
+</ul>
+
+<p>If something doesn't appear in any of these buckets, you have a coverage gap. The intent list forces this accounting before you commit to JSON.</p>
+
+<p><strong>Split aggressively up front.</strong> Three entries that could have been one is cheap. One entry that later needs splitting into four rewrites paths, dependencies, and port_notes for every affected entry.</p>
+
+<div class="step-header"><span class="step-num">3</span> <strong>Write the JSONL</strong></div>
+<p>One JSON object per line, 23 fields per entry (see <a href="#schema">Schema</a>). Key fields:</p>
+
+<table>
+<tr><th>Field</th><th>What It Does</th><th>Common Mistakes</th></tr>
+<tr><td><code>intent</code></td><td>Kebab-case identifier. V5 queries by this.</td><td>Too granular (one per file) or too coarse (one per category)</td></tr>
+<tr><td><code>v4_paths</code></td><td>Array of paths belonging to this intent.</td><td>Phantom paths &mdash; files that don't exist</td></tr>
+<tr><td><code>port_notes</code></td><td>V4 role, &ge;80 chars. For someone who knows V5 but has never seen V4.</td><td>V5 prescriptions leaking in. Thin stubs.</td></tr>
+<tr><td><code>depends_on</code></td><td>Intents that must be ported first.</td><td>Missing or inverted edges, dangling references</td></tr>
+<tr><td><code>debt_assessment</code></td><td><code>clean|refactor|debt|drop</code></td><td>Everything marked "clean" because it feels clean</td></tr>
+<tr><td><code>v5_destination</code></td><td>Always <code>null</code>.</td><td>Filling it in. Don't. V5 decides.</td></tr>
+</table>
+
+<p><strong>Grouping principle:</strong> Group by intent, not by path. Three files serving the same purpose get one entry.</p>
+
+<p><strong>Target count:</strong> 85&ndash;150 entries for a mature installation. Under 85 = catch-all buckets that sacrifice routing accuracy. Over 150 = approaching one-per-file granularity, defeating the compression purpose.</p>
+
+<p>Your PAI should use a TypeScript generator script to produce the JSONL rather than writing raw JSON inline. <code>JSON.stringify()</code> handles escaping correctly; inline JSON in bash is a minefield. Have it run the validator after every batch of ~10 entries to catch errors early.</p>
+
+<div class="step-header"><span class="step-num">4</span> <strong>Run the validator</strong></div>
+<p>At this point you have a draft manifest. Run the validator (see <a href="#validator">below</a>). It will likely pass on schema &mdash; and that's the trap. Schema-valid does not mean correct. Proceed to Pass 2.</p>
+
+<h3>Pass 2: Verify and Harden</h3>
+
+<p>Pass 1 produces a draft that's structurally valid but probably wrong in ways the validator can't catch. Pass 2 fixes it.</p>
+
+<div class="step-header"><span class="step-num">5</span> <strong>Verify paths against filesystem</strong></div>
+<p>The single highest-value check: <code>stat</code> every path in every <code>v4_paths</code> array. If you only do one thing in Pass 2, do this.</p>
+
+<p>Phantom paths are the #1 data quality issue. Files get moved, renamed, or deleted. Hooks that used to live at <code>hooks/X.ts</code> now live at <code>PAI/Tools/X.ts</code>. Without path checking, these phantoms survive indefinitely because the validator can't catch what it doesn't look for.</p>
+
+<div class="step-header"><span class="step-num">6</span> <strong>Check coverage gaps</strong></div>
+<ul>
+<li>Compare your intent list against the filesystem walk from Step 1. Did any directory or file family slip through without an entry or anti-port decision?</li>
+<li>Check root-level items specifically &mdash; files and directories sitting directly at the repository root are the most commonly missed.</li>
+<li>Verify counts in port_notes against actual <code>find</code> output. Stale counts from indexes propagate silently into port_notes.</li>
+</ul>
+
+<div class="step-header"><span class="step-num">7</span> <strong>Check structural integrity</strong></div>
+<ul>
+<li><strong>Dependency cycles:</strong> Run cycle detection on the <code>depends_on</code> graph.</li>
+<li><strong>Bidirectional consistency:</strong> If A blocks B, does B depend on A?</li>
+<li><strong>Orphan entries:</strong> Entries with no <code>depends_on</code> and no <code>blocks</code>. Some are genuinely isolated (projects, portal pages). Others are missing edges (infrastructure entries almost always have real dependencies).</li>
+<li><strong>Overlapping paths:</strong> Two entries claiming the same directory creates routing ambiguity for V5.</li>
+</ul>
+
+<div class="step-header"><span class="step-num">8</span> <strong>Generate the routing table and diff</strong></div>
+<p>Generate the markdown from the JSONL &mdash; don't maintain it separately. It should include:</p>
+<ul>
+<li><strong>Scope Declaration</strong> &mdash; what the manifest covers and what it doesn't</li>
+<li><strong>Category tables</strong> &mdash; intent, status, priority, summary per category</li>
+<li><strong>Gated items</strong> &mdash; entries needing a human decision, with the specific question</li>
+<li><strong>Anti-port list</strong> &mdash; what you decided not to port and why</li>
+<li><strong>Cross-environment artifacts</strong> &mdash; cloud, host-machine, external services</li>
+<li><strong>Data-flow chains</strong> &mdash; pipelines crossing multiple entries that the dependency graph can't represent</li>
+<li><strong>Credentials list</strong> &mdash; API keys, tokens, OAuth &mdash; needs manual transfer</li>
+</ul>
+
+<p>If evolving from a previous draft, produce a diff showing entries added, removed, and modified with sources. This proves audit findings were addressed, not just acknowledged.</p>
+
+<h2 id="schema">The Schema</h2>
+
+<p>23 required fields per entry:</p>
+
+<pre><code>{
+  "intent":           "kebab-case-identifier",
+  "category":         "core-identity|algorithm|hooks|skills|agents|memory|
+                       tools|projects|portal|infrastructure|knowledge|
+                       learning|relationships",
+  "display_name":     "Human-Readable Name",
+  "summary":          "One-line description",
+  "status":           "pending|in-progress|ported|skipped|gated",
+  "status_updated":   "YYYY-MM-DD",
+  "priority":         "P0|P1|P2|P3",
+  "effort":           "5min|30min|2hr|4hr+",
+  "v4_paths":         ["path/to/file", "path/to/dir/"],
+  "v4_role":          "What this does in V4 (longer description)",
+  "v4_format":        "File type and structure description",
+  "content_nature":   "identity|configuration|data|code|documentation|
+                       research|creative",
+  "portability":      "portable|adaptable|v4-native",
+  "v5_destination":   null,
+  "v5_slot_exists":   null,
+  "depends_on":       ["other-intent"],
+  "blocks":           ["other-intent"],
+  "related_indexes":  ["grep command to find related data"],
+  "port_notes":       "V4 role description for V5 consumer (&ge;80 chars)",
+  "debt_assessment":  "clean|refactor|debt|drop &mdash; explanation",
+  "gate":             "Question to answer (if gated) or null",
+  "skip_reason":      "Why skipped (if skipped) or null",
+  "ported_by_session": null
+}</code></pre>
+
+<p>The 13 categories map to the major artifact families in a PAI installation. Your V4 may have different ones &mdash; the validator enforces whatever set you define.</p>
+
+<h2 id="validator">The Validator</h2>
+
+<p>Write it in TypeScript (Bun). Runnable as:</p>
+<pre><code>bun validate-manifest.ts path/to/PORT_MANIFEST.jsonl</code></pre>
+
+<p>It should check:</p>
+
+<table>
+<tr><th>Check</th><th>Why</th></tr>
+<tr><td>All 23 fields present</td><td>Schema completeness</td></tr>
+<tr><td>Enum values valid</td><td>Data quality</td></tr>
+<tr><td><code>v5_destination</code> is null</td><td>No V5 prescriptions</td></tr>
+<tr><td><code>port_notes</code> &ge; 80 characters</td><td>No thin stubs</td></tr>
+<tr><td>V5 names / prescriptions not in port_notes (regex)</td><td>No V5 leaks in prose</td></tr>
+<tr><td>Every <code>v4_path</code> exists on disk</td><td>No phantom paths</td></tr>
+<tr><td><code>depends_on</code> / <code>blocks</code> reference existing intents</td><td>No dangling references</td></tr>
+<tr><td>No dependency cycles</td><td>Ordering is possible</td></tr>
+<tr><td>No duplicate intents</td><td>Routing is unambiguous</td></tr>
+<tr><td>Entry count within target range</td><td>Not too coarse, not too granular</td></tr>
+<tr><td>Skipped have skip_reason, gated have gate question</td><td>No unexplained gaps</td></tr>
+</table>
+
+<p>Implementation notes:</p>
+<ul>
+<li>Path checking: resolve <code>~</code> to <code>$HOME</code>, then <code>existsSync()</code>. Run from the repo root so relative paths resolve.</li>
+<li>Cycle detection: DFS with an in-stack set over <code>depends_on</code> edges.</li>
+<li>Bidirectional check: warning, not error. Some edges are intentionally one-directional.</li>
+<li>V5 regex: catch both explicit (<code>V5 expects</code>) and paraphrased (<code>the newer architecture</code>) references. Tune to your V5's naming.</li>
+</ul>
+
+<h2 id="gotchas">Gotchas</h2>
+
+<div class="card danger">
+<span class="label label-gotcha">Indexes lie</span>
+<p>If your V4 has JSONL indexes or session logs with artifact counts, do not trust them as ground truth. We found 10-50% discrepancies between indexed counts and actual filesystem state. 290 security files the indexes didn't mention. 88 portal directories instead of the indexed 53. Always verify with <code>find</code>.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">Phantom paths survive schema validation</span>
+<p>Without path existence checking, the validator happily accepts paths to files that were moved or deleted months ago. Add <code>stat</code> checking &mdash; it's the single highest-value validator feature. We found 12 phantom paths that survived every other check.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">Prose escapes the validator</span>
+<p>The validator checks <code>v4_paths</code> for existence and <code>port_notes</code> for V5 prescriptions. But the markdown routing table &mdash; data-flow chains, cross-environment lists, credentials tables &mdash; is <strong>free text no validator touches</strong>. We wrote phantom paths into data-flow chain documentation and didn't catch them until manual review. Anything in prose is unguarded.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">Root-level orphans</span>
+<p>The manifest naturally covers well-known subdirectories (hooks/, skills/, agents/, MEMORY/). But files and directories at the repository root &mdash; one-off scripts, research repos, parked code &mdash; get missed because no audit pattern looks for them. Walk the root explicitly. We found 10 orphan items with no manifest fate.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">Process ceremony without substance</span>
+<p>Running a structured methodology (agents, phases, checklists) and then doing the actual work without the structure is worse than not using a methodology at all. It produces a validator-passing artifact that <em>looks</em> rigorous but wasn't built with rigor. If you skip the intent list and go straight to writing JSONL, the resulting manifest will have coverage gaps. The intent list exists to prevent exactly this.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">0 validator errors ≠ correct</span>
+<p>The validator checks structure. It cannot check completeness &mdash; it has no model of what <em>should</em> exist. A manifest with 0 errors and 40% coverage gaps will pass. The only defense is the 2-pass process: Pass 1 drafts, Pass 2 verifies against reality.</p>
+</div>
+
+<h2 id="limitations">Honest Limitations</h2>
+
+<p>The manifest has structural limitations that can't be fixed by adding more entries:</p>
+
+<table>
+<tr><th>Limitation</th><th>Why</th><th>Mitigation</th></tr>
+<tr>
+<td><strong>Filesystem-only coverage</strong></td>
+<td>The scanner only sees the local filesystem. Cloud databases, host-machine configs, SaaS state are invisible to <code>find</code>.</td>
+<td>Cross-environment section documents <em>known</em> off-filesystem artifacts. But "known" is the operative word.</td>
+</tr>
+<tr>
+<td><strong>~30% dependency coverage</strong></td>
+<td><code>depends_on</code>/<code>blocks</code> captures "port X before Y." It can't represent data-flow chains, runtime ordering, import graphs, or temporal sequencing.</td>
+<td>Data-flow chains section documents major pipelines in prose. Unvalidated and incomplete.</td>
+</tr>
+<tr>
+<td><strong>No completeness detection</strong></td>
+<td>The validator checks structure, not coverage. 0 errors does not mean 0 gaps.</td>
+<td>The 2-pass process reduces gaps. "Reduces" is not "eliminates."</td>
+</tr>
+<tr>
+<td><strong>Staleness</strong></td>
+<td>Numeric claims in port_notes drift as the system changes. At active-development pace, counts go stale within a week.</td>
+<td>V5 should verify counts at port time. The manifest says <em>where</em> to look; V5 counts what it finds.</td>
+</tr>
+<tr>
+<td><strong>Catalog, not architecture map</strong></td>
+<td>The schema can't represent feedback loops (Memory &rarr; Hooks &rarr; Learning &rarr; Algorithm &rarr; Memory). <code>depends_on</code> must be acyclic.</td>
+<td>Accept this. The manifest compresses 200K+ tokens into ~30K of structured navigation. It's compression, not modeling.</td>
+</tr>
+</table>
+
+<h2 id="what-v5-does">What V5 Does With This</h2>
+
+<p>The manifest is an input to V5, not a prescription for V5:</p>
+
+<ol>
+<li><strong>Query by intent.</strong> V5 reads the JSONL and searches for the artifact family it needs. Two tool calls: find the intent, read the entry.</li>
+<li><strong>Read the port_notes.</strong> Understands what V4 had, in V4's terms. No V5 assumptions baked in.</li>
+<li><strong>Self-place the artifact.</strong> V5 decides where it goes in V5's architecture. The manifest provides context; V5 makes the architectural decision.</li>
+<li><strong>Check dependencies.</strong> Before porting entry X, check if <code>depends_on</code> entries are already ported.</li>
+<li><strong>Verify at port time.</strong> Don't trust manifest counts or paths blindly. <code>stat</code> the paths. Count the files. The manifest may be stale.</li>
+<li><strong>Resolve gates.</strong> Gated entries need a human decision before V5 can proceed. The gate question tells V5 what to ask.</li>
+</ol>
+
+<div class="card success">
+<span class="label" style="background: rgba(45, 212, 191, 0.2); color: var(--teal);">The value proposition</span>
+<p style="margin-bottom:0;">Without a manifest, every V5 porting session starts with filesystem archaeology &mdash; <code>find</code>, <code>grep</code>, <code>du</code>, reading files to understand what they do, guessing at dependencies. With a manifest, that archaeology is done once and compressed into a queryable format. For dozens of porting sessions ahead, the manifest pays for its 2-3 hour investment many times over.</p>
+</div>
+
+<h2 id="starter-kit">Starter Kit</h2>
+
+<p>The <code>template/</code> directory contains everything needed to start building a manifest:</p>
+
+<table>
+<tr><th>File</th><th>What It Is</th></tr>
+<tr>
+<td><a href="template/BRIEF.md"><code>BRIEF.md</code></a></td>
+<td>LLM-optimized session brief. Copy-paste this into a fresh PAI session to kick off the manifest build. Contains the full schema, 2-pass process, constraints, and gotchas in a format optimized for LLM consumption rather than human reading.</td>
+</tr>
+<tr>
+<td><a href="template/validate-manifest.ts"><code>validate-manifest.ts</code></a></td>
+<td>The validator script (Bun/TypeScript). Checks schema completeness, enum validity, null v5_destination, port_notes length, V5 prescription regex, path existence on disk, dependency references, cycle detection, duplicates, entry count range. Customize the <code>VALID_CATEGORIES</code> and V5 regex at the top for your installation.</td>
+</tr>
+<tr>
+<td><a href="template/PORT_MANIFEST.jsonl"><code>PORT_MANIFEST.jsonl</code></a></td>
+<td>Seed file with one example entry showing all 23 fields. Your PAI replaces this with real entries from the filesystem audit.</td>
+</tr>
+</table>
+
+<h3>Quick start</h3>
+
+<ol>
+<li>Copy the <code>template/</code> directory into your V4 installation</li>
+<li>Customize <code>validate-manifest.ts</code>: update <code>VALID_CATEGORIES</code> if yours differ, update the V5 regex to match your V5's naming conventions</li>
+<li>Open a fresh PAI session and paste the contents of <code>BRIEF.md</code></li>
+<li>Let your PAI run the 2-pass process</li>
+<li>Review the generated <code>PORT_MANIFEST.md</code> yourself &mdash; this guide tells you what to look for</li>
+</ol>
+
+<div class="card warning">
+<span class="label label-warn">This process is not perfect</span>
+<p style="margin-bottom:0;">The methodology was tested on one real migration and refined through three iterations. It works, but it has blind spots (see <a href="#limitations">Limitations</a>). Your PAI may find new gotchas. If it does, the intent list and validator give you structured places to catch them &mdash; which is the whole point of having a process rather than winging it.</p>
+</div>
+
+<hr>
+
+<p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2rem;">
+Port Manifest Guide &mdash; derived from a real V4&rarr;V5 migration. 2-pass process, 94 entries from filesystem ground truth. Your PAI does the work; this gives you the principles to review it.
+</p>
+
+</body>
+</html>
