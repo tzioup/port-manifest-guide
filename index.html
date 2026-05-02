@@ -445,6 +445,13 @@ hr {
 
 <p>Why two passes? Because the first pass will be incomplete. It always is. You'll miss directories, trust stale counts, overlook root-level orphans, and group things too coarsely. The second pass exists to catch this &mdash; the discipline is doing it rather than shipping the draft.</p>
 
+<div class="card warning">
+<span class="label label-warn">This won't fit in one session</span>
+<p>A mature V4 instance has thousands of files across dozens of directories. The filesystem audit alone can exhaust a context window. Expect this work to span multiple sessions and/or parallel agents.</p>
+<p>The first session should produce a <strong>Spine</strong> &mdash; a continuation document written to disk that ensures lossless handover. It should contain: filesystem audit results (verified counts, expensive to re-derive), the intent list (every artifact's planned fate), decisions made (grouping, splits, category assignments), and what's done vs. pending. Each subsequent session reads the Spine first, does its work, and updates it before closing.</p>
+<p style="margin-bottom:0;">Without a Spine, each new session re-discovers what the last one already found, makes different grouping decisions, and produces inconsistent entries. The manifest is the deliverable; the Spine is how you get there across context boundaries.</p>
+</div>
+
 <h3>Pass 1: Audit and Draft</h3>
 
 <div class="step-header"><span class="step-num">1</span> <strong>Walk the filesystem</strong></div>
