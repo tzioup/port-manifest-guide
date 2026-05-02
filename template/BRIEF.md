@@ -1,6 +1,18 @@
 # Port Manifest — Session Brief
 
-Give this to your PAI in a fresh session. It contains everything needed to build a Port Manifest for your V4 installation.
+## Definition of success
+
+You are done when:
+1. Every artifact in the V4 installation has a fate: a manifest entry, an explicit anti-port decision, or is folded into another entry. Nothing is unaccounted.
+2. Every `v4_path` in the manifest points to a file or directory that actually exists on disk.
+3. The manifest describes V4 as it is — no V5 destinations, no prescriptions about where things should go in V5.
+4. The validator passes with 0 errors.
+5. A human can review the generated markdown routing table and spot any gaps you missed.
+
+## Companion files in this directory
+
+- `validate-manifest.ts` — Bun/TypeScript validator. Customize `VALID_CATEGORIES` and V5 regex at the top. Run with `bun validate-manifest.ts PORT_MANIFEST.jsonl`.
+- `PORT_MANIFEST.jsonl` — Seed file with one example entry showing all 23 fields. Replace with real entries.
 
 ---
 
