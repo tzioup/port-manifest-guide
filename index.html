@@ -278,6 +278,7 @@ hr {
 <li><a href="#gotchas">Gotchas</a></li>
 <li><a href="#limitations">Honest Limitations</a></li>
 <li><a href="#what-v5-does">What V5 Does With This</a></li>
+<li><a href="#v5-receiving">The Receiving End &mdash; V5 Field Notes</a></li>
 <li><a href="#starter-kit">Starter Kit</a></li>
 </ul>
 </div>
@@ -692,6 +693,125 @@ hr {
 <p style="margin-bottom:0;">Without a manifest, every V5 porting session starts with filesystem archaeology &mdash; <code>find</code>, <code>grep</code>, <code>du</code>, reading files to understand what they do, guessing at dependencies. With a manifest, that archaeology is done once and compressed into a queryable format. For dozens of porting sessions ahead, the manifest pays for its 2-3 hour investment many times over.</p>
 </div>
 
+<h2 id="v5-receiving">The Receiving End &mdash; V5 Field Notes</h2>
+
+<p>Everything above covers building the manifest. This section covers <strong>consuming</strong> it &mdash; what V5 actually encounters when it starts porting from a manifest. Based on a real migration (~2.9GB V4 instance, 408 work sessions, 64 manifest intents). Your numbers will differ; the patterns should generalize.</p>
+
+<div class="card" style="border-left: 3px solid var(--purple); background: rgba(196, 113, 237, 0.06);">
+<span class="label" style="background: rgba(196, 113, 237, 0.2); color: var(--purple);">V5 prompt template</span>
+<p style="margin-bottom:0;">Just as V4 uses <a href="template/BRIEF.md" style="color: var(--purple);"><code>BRIEF.md</code></a> to build the manifest, V5 uses <a href="template/V5_BRIEF.md" style="color: var(--purple);"><code>V5_BRIEF.md</code></a> to consume it. Point your V5 PAI at it when starting the porting process.</p>
+</div>
+
+<h3>Map your retrieval architecture first</h3>
+
+<p>The manifest describes V4. V5 needs to know <em>itself</em> before it can route content. Which files load at startup? Which tools search which directories? Which hooks auto-generate content? Without this map, V5 falls into file-name matching &mdash; mapping V4 filenames to V5 filenames &mdash; which is wrong because the taxonomies are different.</p>
+
+<div class="card warning">
+<span class="label label-warn">The question to ask</span>
+<p style="margin-bottom:0;">"Where will V5 look for this when it needs it?" &mdash; not "what's the V5 equivalent filename?"</p>
+</div>
+
+<h3>Stock vs. flow &mdash; the biggest insight</h3>
+
+<p>The manifest catalogs everything by intent. But intent doesn't tell V5 whether it needs the content at all. The classification that cuts across every category:</p>
+
+<div class="compare-grid">
+<div class="compare-col">
+<h3 style="color: var(--pink);">Stock &mdash; leave it</h3>
+<p style="font-size: 0.9rem;">Accumulated observations V5 regenerates through its own hooks and learning system.</p>
+<ul>
+<li>Relationship memory entries</li>
+<li>Algorithm reflections</li>
+<li>Session logs / journal entries</li>
+<li>Learning signals / satisfaction ratings</li>
+<li>Failure captures</li>
+</ul>
+<p style="font-size: 0.85rem; color: var(--text-muted);">These are calibrated for V4's hooks, schema, and behavior. Porting them contaminates V5's developing model.</p>
+</div>
+<div class="compare-col">
+<h3 style="color: var(--teal);">Flow &mdash; port it</h3>
+<p style="font-size: 0.9rem;">One-time work product V5 cannot recreate.</p>
+<ul>
+<li>Research investigations</li>
+<li>Curated discoveries &amp; decisions</li>
+<li>Project documentation</li>
+<li>Build logs &amp; creative output</li>
+<li>Knowledge notes</li>
+</ul>
+<p style="font-size: 0.85rem; color: var(--text-muted);">These represent real intellectual work that happened once. V5 has no mechanism to regenerate them.</p>
+</div>
+</div>
+
+<p><strong>The systems argument:</strong> V5 has a native learning flywheel &mdash; sessions generate observations, observations improve the model, better model means better effectiveness, better effectiveness means more sessions. Early in V5's life this loop is fragile. Bulk-porting V4 observations floods the pool with content calibrated for a different system. V5's own signal gets drowned out. The V4 observations become the dominant model &mdash; and they're wrong for V5.</p>
+
+<h3>Same-taxonomy trap</h3>
+
+<p>If V4 and V5 share a taxonomy (both have TELOS files with similar names), classification-based migration tools will fail. They try to reclassify already-correct content and produce low confidence with misrouting. Use <strong>direct diff-and-merge</strong> instead: read both versions, identify what V5 is missing, merge the delta.</p>
+
+<h3>Two-tier file pattern</h3>
+
+<p>V5 files loaded at startup need to stay concise. V4 depth goes below a <code>## Deep Context</code> heading:</p>
+
+<pre><code>## Challenge Title
+
+C0: **One-paragraph summary.** Quick-scan friendly.
+
+## Deep Context
+
+### Full depth here
+Detailed analysis, source material, full context...</code></pre>
+
+<p>Startup gets the concise scan. Skills that read on-demand get the depth. Both live in one file.</p>
+
+<h3>Cluster knowledge notes</h3>
+
+<p>When triaging closeout artifacts (decisions, discoveries), group KEEP entries by theme into ~5-10 clustered notes rather than one file per entry. BM25 search retrieves one well-tagged file better than many tiny files with weak individual matches. Use V5-compliant frontmatter with <code>status: evergreen</code> and descriptive tags.</p>
+
+<h3>Conventions are capabilities</h3>
+
+<p>V4 artifacts with a <code>CONVENTION.md</code> or routing rule aren't just data &mdash; they're capabilities. Porting the data file is mechanical. Recreating the routing convention is a design task. Flag these for the user rather than silently copying the data and ignoring the convention.</p>
+
+<h3>Numbers from a real migration</h3>
+
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>V4 archive size</td><td>~2.9GB, 408 work sessions</td></tr>
+<tr><td>Manifest intents</td><td>64 (consolidated from 94)</td></tr>
+<tr><td>Content entering V5's active path</td><td>~220 files + 433MB local search corpus</td></tr>
+<tr><td>Content left in V4 backup</td><td>~500+ files (stock data, stale findings, logs)</td></tr>
+<tr><td style="color: var(--pink);">Ratio</td><td style="color: var(--pink);"><strong>~1.4%</strong> of V4 archive into V5's active retrieval path</td></tr>
+<tr><td>Sessions spent</td><td>~4 (2 parallel at peak)</td></tr>
+</table>
+
+<p>The ~1.4% ratio is correct, not a failure. Most V4 content is stock (V5 rebuilds natively), stale (outdated findings), or historical (session logs from a different system). The V4 backup remains accessible for reference &mdash; not porting is not losing.</p>
+
+<h3>Manifest blind spots V5 should watch for</h3>
+
+<div class="card danger">
+<span class="label label-gotcha">V5's default bias is to DROP V4 capabilities</span>
+<p style="margin-bottom:0;">When assessing V4-unique skills, hooks, or agents against V5 equivalents, the receiving instance compares frontmatter and names, concludes "V5 already has this," and recommends DROP. On one real migration this was wrong ~80% of the time. Force deep cross-comparison: spawn agents to read the <strong>full content</strong> of both V4 and V5 versions side by side. The picture changed from 80% DROP to 10% DROP &mdash; V4 capabilities had depth, methodology, and features that V5's similarly-named equivalents didn't cover. Surface comparison is not comparison.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">No stock/flow distinction</span>
+<p style="margin-bottom:0;">The manifest catalogs by intent, not by regenerability. V5 must classify stock vs. flow during triage.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">No file-size warnings</span>
+<p style="margin-bottom:0;">Large archives (hundreds of MB) aren't flagged. V5 discovers the size at port time. Check <code>du -sh</code> before committing.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">No retrieval-path context</span>
+<p style="margin-bottom:0;">The manifest describes V4's structure. V5 needs to map its own retrieval architecture before routing content.</p>
+</div>
+
+<div class="card danger">
+<span class="label label-gotcha">Conventions aren't flagged as capabilities</span>
+<p style="margin-bottom:0;"><code>CONVENTION.md</code> files represent routing rules, not just data. The manifest treats them as files.</p>
+</div>
+
 <h2 id="starter-kit">Starter Kit</h2>
 
 <p>The <code>template/</code> directory contains everything needed to start building a manifest:</p>
@@ -701,6 +821,10 @@ hr {
 <tr>
 <td><a href="template/BRIEF.md"><code>BRIEF.md</code></a></td>
 <td>LLM-optimized session brief. Copy-paste this into a fresh PAI session to kick off the manifest build. Contains the full schema, 2-pass process, constraints, and gotchas in a format optimized for LLM consumption rather than human reading.</td>
+</tr>
+<tr>
+<td><a href="template/V5_BRIEF.md"><code>V5_BRIEF.md</code></a></td>
+<td>LLM-optimized V5 receiving brief. Paste into a V5 PAI session when ready to consume the manifest. Covers stock/flow classification, retrieval-architecture mapping, same-taxonomy trap, routing rules, and wave structure.</td>
 </tr>
 <tr>
 <td><a href="template/validate-manifest.ts"><code>validate-manifest.ts</code></a></td>
@@ -730,7 +854,7 @@ hr {
 <hr>
 
 <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2rem;">
-Port Manifest Guide &mdash; derived from a real V4&rarr;V5 migration. 2-pass process, 94 entries from filesystem ground truth. Your PAI does the work; this gives you the principles to review it.
+Port Manifest Guide &mdash; derived from a real V4&rarr;V5 migration. Covers both sides: building the manifest (V4) and consuming it (V5). Your PAI does the work; this gives you the principles to review it.
 </p>
 
 </body>
